@@ -20,10 +20,8 @@
 // Dmitry Igrishin
 // dmitigr@gmail.com
 
-const nso = function(locales, options) {
-  const cmp_ = (locales || options) ?
-    (lhs, rhs) => lhs.localeCompare(rhs, locales, options) :
-    (lhs, rhs) =>
+const nso = function() {
+  const cmp_ = (lhs, rhs) =>
   {
     var result = 0;
     var lhsIdx = 0;
@@ -41,13 +39,23 @@ const nso = function(locales, options) {
 
     function cmp__(lhs, rhs)
     {
-      if (!isNaN(lhs)) {
-        if (!isNaN(rhs))
+      if (typeof (lhs) === 'number') {
+        if (typeof (rhs) === 'number')
           return lhs < rhs ? -1 : (lhs > rhs ? 1 : 0);
         else
           return -1;
+      } else if (typeof (rhs) !== 'number') {
+        for (let i = 0; (i < lhs.length && i < rhs.length); ++i) {
+          const lc = lhs.charCodeAt(i);
+          const rc = rhs.charCodeAt(i);
+          if (lc < rc)
+            return -1;
+          else if (lc > rc)
+            return 1;
+        }
+        return lhs.length < rhs.length ? -1 : (lhs.length > rhs.length ? 1 : 0);
       } else
-        return isNaN(rhs) ? lhs.localeCompare(rhs) : 1;
+        return 1;
     }
 
     while ((lhsIdx != lhs.length || rhsIdx != rhs.length) && result == 0) {
@@ -70,4 +78,4 @@ const nso = function(locales, options) {
     greaterOrEqual : (lhs, rhs) => { return cmp_(lhs, rhs) >= 0; },
     greater : (lhs, rhs) => { return cmp_(lhs, rhs) > 0; }
   };
-}(undefined, {numeric : true});
+}();
